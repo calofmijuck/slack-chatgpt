@@ -11,7 +11,7 @@ def ChatGPT(messages):
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
             *messages,
-        ]
+        ],
     )
 
-    return completion['choices'][0]['message']["content"].strip()
+    return completion["choices"][0]["message"]["content"].strip()
