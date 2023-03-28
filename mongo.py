@@ -9,7 +9,9 @@ sessions = db.sessions
 def get_session(session_id: str):
     session = sessions.find_one({"_id": session_id})
     if session is None:
-        session = sessions.insert_one({"_id": session_id, "messages": []})
+        sessions.insert_one({"_id": session_id, "messages": []})
+        return {"_id": session_id, "messages": []}
+
     return session
 
 
