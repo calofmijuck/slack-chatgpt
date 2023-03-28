@@ -2,8 +2,8 @@ from slack import RTMClient
 
 from chatgpt import ChatGPT
 from config import SLACK_BOT_TOKEN
+from mongo import get_session, reset_session, update_session
 
-DATA: dict[str, list[dict[str, str]]] = {}
 
 @RTMClient.run_on(event="message")
 def chatgptbot(**payload):
@@ -14,36 +14,36 @@ def chatgptbot(**payload):
     origin_text = data.get("text", "")
     tag_code = origin_text.split(" ")[0]
 
-    # print(data)
+    print(data)
 
     if bot_id == "" and subtype == "" and tag_code == "<@U050LJCJBJP>":
         channel_id = data["channel"]
-    
+
         text = data.get("text", "")
         text = text.split(">")[-1].strip()
-    
+
         message_ts = data["ts"]
 
-        key = f"{channel_id}:{data['user']}"
-        if key not in DATA:
-            DATA[key] = []
-
+        session_id = f"{channel_id}:{data['user']}"
         if text == "reset":
-            DATA[key] = []
-            web_client.chat_postMessage(channel=channel_id, text="Session reset!", thread_ts=message_ts)
+            reset_session(session_id)
+            web_client.chat_postMessage(
+                channel=channel_id, text="Session reset!", thread_ts=message_ts
+            )
             return
 
-        DATA[key].append(
-            {"role": "user", "content": text}
-        )
+        session = get_session(session_id)
+        messages = session["messages"]
 
-        response = ChatGPT(DATA[key])
-        
-        DATA[key].append(
-            {"role": "assistant", "content": response}
+        messages.append({"role": "user", "content": text})
+
+        response = ChatGPT(messages)
+        messages.append({"role": "assistant", "content": response})
+        update_session(session_id, messages)
+
+        web_client.chat_postMessage(
+            channel=channel_id, text=response, thread_ts=message_ts
         )
-        
-        web_client.chat_postMessage(channel=channel_id, text=response, thread_ts=message_ts)
 
 
 if __name__ == "__main__":
