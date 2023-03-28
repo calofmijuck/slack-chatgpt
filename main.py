@@ -14,13 +14,13 @@ def chatgptbot(**payload):
     origin_text = data.get("text", "")
     tag_code = origin_text.split(" ")[0]
 
-    print(data)
-
     if bot_id == "" and subtype == "" and tag_code == "<@U050LJCJBJP>":
         channel_id = data["channel"]
 
         text = data.get("text", "")
         text = text.split(">")[-1].strip()
+
+        # print(f"Received: {text}")
 
         message_ts = data["ts"]
 
@@ -52,4 +52,5 @@ if __name__ == "__main__":
         print("Bot connected and running!")
         rtm_client.start()
     except Exception as err:
+        err.with_traceback()
         print(err)
