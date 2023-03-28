@@ -1,0 +1,2 @@
+# slack-chatgpt
+Slack ChatGPT
